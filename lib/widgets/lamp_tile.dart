@@ -5,6 +5,7 @@ class LampTile extends StatelessWidget {
   final Color lampOnColor;
   final Color lampOffColor;
   final VoidCallback onTap;
+  final String zone;
 
   const LampTile({
     super.key,
@@ -12,6 +13,7 @@ class LampTile extends StatelessWidget {
     required this.lampOnColor,
     required this.lampOffColor,
     required this.onTap,
+    required this.zone,
   });
 
   @override
@@ -21,7 +23,7 @@ class LampTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: isOn ? lampOnColor : whiteBg, // เปิด = BG แดง
+        color: isOn ? lampOnColor : whiteBg,
         boxShadow: [
           BoxShadow(
             color: isOn
@@ -39,11 +41,10 @@ class LampTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(10), // ลด padding กัน overflow
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ไอคอนยืดสูง ใช้พื้นที่ให้พอดี
                 Expanded(
                   child: Center(
                     child: AnimatedContainer(
@@ -58,7 +59,7 @@ class LampTile extends StatelessWidget {
                       child: Icon(
                         Icons.lightbulb_outlined,
                         color: isOn ? Colors.white : lampOffColor,
-                        size: 26, // ลดลงเล็กน้อย
+                        size: 26,
                       ),
                     ),
                   ),
@@ -66,9 +67,8 @@ class LampTile extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                // ชื่อโซน
                 Text(
-                  'Zone', // ชื่อจริงควรใส่จากภายนอกถ้าต้องการ index
+                  '$zone',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -81,7 +81,6 @@ class LampTile extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                // ชิปสถานะสูงคงที่
                 SizedBox(
                   height: 24,
                   child: Center(

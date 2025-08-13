@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:smart_control/core/network/api_service.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../widgets/status_item.dart';
 import '../widgets/action_icon_button.dart';
 import '../widgets/keypad_row.dart';
@@ -14,9 +18,70 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _displayText = '0';
-  final List<bool> _switchStates = List.generate(50, (_) => false);
   final DateTime _currentTime = DateTime.now();
   String _username = "Admin";
+  List<dynamic> zones = [];
+  WebSocketChannel? _channel;
+
+  void connectWebSocket() {
+    _channel = WebSocketChannel.connect(
+      Uri.parse('ws://localhost:8080'), // เปลี่ยนเป็นของจริง
+    );
+
+    _channel!.stream.listen(
+      (message) {
+        try {
+          final data = jsonDecode(message);
+
+          // ตรวจว่ามี field zone, stream_enabled, volume, is_playing
+          if (data is Map && data.containsKey("zone")) {
+            print("test test 123");
+
+            setState(() {
+              final idx = zones.indexWhere(
+                (z) => z["no"] == data["zone"] || z["no"] == data["zone"],
+              );
+
+              if (idx != -1) {
+                setState(() {
+                  zones[idx]["status"]["stream_enabled"] =
+                      data["stream_enabled"] ??
+                      zones[idx]["status"]["stream_enabled"];
+                  zones[idx]["status"]["volume"] =
+                      data["volume"] ?? zones[idx]["status"]["volume"];
+                  zones[idx]["status"]["is_playing"] =
+                      data["is_playing"] ?? zones[idx]["status"]["is_playing"];
+                });
+              }
+            });
+          }
+        } catch (e) {
+          print("WebSocket parse error: $e");
+        }
+      },
+      onError: (err) {
+        print("WebSocket error: $err");
+      },
+      onDone: () {
+        print("WebSocket closed, reconnecting...");
+        Future.delayed(const Duration(seconds: 3), connectWebSocket);
+      },
+    );
+  }
+
+  void getAllZones() async {
+    try {
+      final api = ApiService.public();
+
+      final result = await api.get('/device');
+
+      setState(() {
+        zones = result;
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
 
   void _onKeyPressed(String value) {
     setState(() {
@@ -40,11 +105,19 @@ class _HomeScreenState extends State<HomeScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    getAllZones();
+    connectWebSocket();
+  }
+
+  @override
+  void dispose() {
+    _channel?.sink.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Theme Colors
     final whiteBg = Colors.white;
     final cardBg = Colors.grey[50]!;
     final accent = Colors.blue[600]!;
@@ -73,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  // Logo and Brand
                   Row(
                     children: [
                       Container(
@@ -97,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
 
-                  // Status Info
                   Expanded(
                     child: Center(
                       child: Row(
@@ -126,7 +197,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Action Buttons
                   Row(
                     children: [
                       ActionIconButton(
@@ -161,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // LEFT: Keypad + Display
             Expanded(
               flex: 2,
               child: Container(
@@ -179,7 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Display
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -207,7 +275,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
 
-                    // Keypad (3D)
                     Expanded(
                       child: Column(
                         children: [
@@ -238,7 +305,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // RIGHT: Lamp Zones
             const SizedBox(width: 16),
             Expanded(
               flex: 3,
@@ -256,26 +322,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 padding: const EdgeInsets.all(16),
                 child: GridView.builder(
-                  itemCount: 50,
+                  itemCount: zones.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 5,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.85, // สูงขึ้นเล็กน้อยกัน overflow
+                    childAspectRatio: 0.85,
                   ),
                   itemBuilder: (context, index) {
-                    final isOn = _switchStates[index];
+                    final isOn = zones[index];
+                    print(zones[index]["status"]);
                     return LampTile(
-                      isOn: isOn,
+                      isOn: isOn["status"]["stream_enabled"],
                       lampOnColor: lampOn,
                       lampOffColor: lampOff,
+                      zone: "โซน ${index + 1}",
                       onTap: () {
-                        setState(() {
-                          _switchStates[index] = !_switchStates[index];
-                          _onKeyPressed(
-                            'Zone ${index + 1}: ${_switchStates[index] ? "ACTIVE" : "OFF"}',
-                          );
-                        });
+                        // setState(() {
+                        //   zones[index] = !zones[index];
+                        //   _onKeyPressed(
+                        //     'Zone ${index + 1}: ${zones[index] ? "ACTIVE" : "OFF"}',
+                        //   );
+                        // });
                       },
                     );
                   },

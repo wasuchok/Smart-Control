@@ -37,6 +37,8 @@ dependencies:
   dio: ^5.9.0
   flutter_secure_storage: ^9.2.4
   web_socket_channel: ^3.0.3
+  cherry_toast: ^1.13.0
+  toastification: ^3.0.3
 
 dev_dependencies:
   flutter_test:

@@ -102,14 +102,14 @@ class ApiService {
 
   Future<T> post<T>(
     String path, {
-    dynamic data,
+    dynamic data, // เปลี่ยนจาก Map<dynamic, Map<String, int>> เป็น dynamic
     Json? query,
     FromJson<T>? decoder,
     CancelToken? cancelToken,
   }) => _request<T>(
     path,
     method: 'POST',
-    data: data,
+    data: data, // ส่ง data โดยตรง
     query: query,
     decoder: decoder,
     cancelToken: cancelToken,

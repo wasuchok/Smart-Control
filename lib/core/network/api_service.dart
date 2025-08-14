@@ -106,6 +106,7 @@ class ApiService {
     Json? query,
     FromJson<T>? decoder,
     CancelToken? cancelToken,
+    Options? options,
   }) => _request<T>(
     path,
     method: 'POST',

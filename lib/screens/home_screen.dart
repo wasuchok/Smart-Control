@@ -228,8 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void connectWebSocket() {
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://192.168.1.83:8080/ws/status'),
-    );
+      Uri.parse('ws://110.171.195.179:8080/ws/status'),
+    ); //110.171.195.179 public IP, 192.168.1.83 local IP
     channel.stream.listen((message) {
       final data = jsonDecode(message);
       if (data["zone"] != null) {

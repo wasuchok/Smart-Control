@@ -77,8 +77,8 @@ class _MicPageState extends State<MicPage> {
       await _cleanupConnections();
 
       // สร้าง WebSocket ใหม่
-      _log('🌐 กำลังเชื่อมต่อ WebSocket: ws://192.168.1.83:8080/ws/mic');
-      _channel = IOWebSocketChannel.connect("ws://192.168.1.83:8080/ws/mic");
+      _log('🌐 กำลังเชื่อมต่อ WebSocket: ws://110.171.195.179:8080/ws/mic');
+      _channel = IOWebSocketChannel.connect("ws://110.171.195.179:8080/ws/mic");
       _log('🌐 สร้าง WebSocket channel แล้ว');
 
       _wsDone = Completer<void>();

@@ -17,7 +17,9 @@ class _MicStreamPageState extends State<MicStreamPage> {
   @override
   void initState() {
     super.initState();
-    _channel = IOWebSocketChannel.connect(Uri.parse('ws://192.168.1.83:8080'));
+    _channel = IOWebSocketChannel.connect(
+      Uri.parse('ws://192.168.1.83:8080'),
+    ); //110.171.195.179 public IP,
   }
 
   Future<void> _startMic() async {

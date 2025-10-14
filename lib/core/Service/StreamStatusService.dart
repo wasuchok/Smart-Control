@@ -6,7 +6,8 @@ class StreamStatusService {
   void connect() {
     SSEClient.subscribeToSSE(
       method: SSERequestType.GET,
-      url: 'http://192.168.1.83:8080/playlist/stream/status-sse',
+      url:
+          'http://110.171.195.179:8080/playlist/stream/status-sse', //110.171.195.179 public IP, 192.168.1.83 local IP
       header: {
         "Accept": "text/event-stream",
         "Cache-Control": "no-cache",
